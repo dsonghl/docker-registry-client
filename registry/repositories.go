@@ -1,5 +1,8 @@
 package registry
 
+import (
+	"regexp"
+)
 type repositoriesResponse struct {
 	Repositories []string `json:"repositories"`
 }
@@ -10,6 +13,11 @@ func (registry *Registry) Repositories() ([]string, error) {
 	var err error //We create this here, otherwise url will be rescoped with :=
 	var response repositoriesResponse
 	for {
+		// make sure full url match
+		match, _ := regexp.MatchString(registry.URL, url)
+		if !match {
+			url = registry.URL + url
+		}
 		registry.Logf("registry.repositories url=%s", url)
 		url, err = registry.getPaginatedJson(url, &response)
 		switch err {
